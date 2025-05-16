@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutri Steam - App Nutricional</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --primary-light: #7ea1e6;
+            --secondary: #f7b801;
+            --danger: #e63946;
+            --success: #43aa8b;
+            --bg: #f4f6fb;
+            --white: #fff;
+            --gray: #e5e7eb;
+            --gray-dark: #6b7280;
+            --radius: 14px;
+            --shadow: 0 4px 24px rgba(74,111,165,0.08);
+            --transition: .2s cubic-bezier(.4,0,.2,1);
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            margin: 0;
+            color: #222;
+        }
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 16px 80px 16px;
+        }
+        header {
+            background: var(--white);
+            box-shadow: var(--shadow);
+            border-radius: var(--radius);
+            margin-bottom: 32px;
+            padding: 18px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        nav {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--gray-dark);
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background var(--transition), color var(--transition);
+        }
+        .nav-btn.active, .nav-btn:hover {
+            background: var(--primary-light);
+            color: var(--white);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+        }
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 28px 24px 24px 24px;
+            margin-bottom: 18px;
+            position: relative;
+            transition: box-shadow var(--transition), transform var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 8px 32px rgba(74,111,165,0.13);
+            transform: translateY(-2px) scale(1.01);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-actions button {
+            background: none;
+            border: none;
+            color: var(--gray-dark);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: color var(--transition);
+        }
+        .card-actions button:hover {
+            color: var(--primary);
+        }
+        .progress-container {
+            width: 100%;
+            background: var(--gray);
+            border-radius: 8px;
+            height: 22px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+            font-weight: 600;
+            font-size: .92rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: width .5s;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: .98rem;
+            color: var(--gray-dark);
+        }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .stat-value {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+        .stat-label {
+            font-size: .82rem;
+            color: var(--gray-dark);
+            opacity: .8;
+        }
+        .meal-log {
+            margin-top: 10px;
+        }
+        .meal-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--gray);
+        }
+        .meal-item:last-child { border-bottom: none; }
+        .meal-info { display: flex; flex-direction: column; }
+        .meal-name { font-weight: 600; color: var(--primary); }
+        .meal-time { font-size: .82rem; color: var(--gray-dark); }
+        .meal-calories { font-weight: 600; color: var(--secondary); }
+        .btn {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius);
+            padding: 10px 22px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background var(--transition);
+        }
+        .btn:hover { background: var(--secondary); color: #222; }
+        .water-tracker {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 18px 0;
+        }
+        .water-glass {
+            width: 36px;
+            height: 54px;
+            border: 2px solid var(--primary);
+            border-radius: 0 0 10px 10px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            background: var(--white);
+            transition: box-shadow var(--transition), transform var(--transition);
+        }
+        .water-glass.filled {
+            background: var(--primary-light);
+            box-shadow: 0 2px 8px rgba(74,111,165,0.13);
+        }
+        .water-amount {
+            font-size: .9rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .tips-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .tips-list li {
+            margin-bottom: 10px;
+            padding-left: 18px;
+            position: relative;
+            font-size: .98rem;
+        }
+        .tips-list li:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+        .nutrition-facts {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0;
+        }
+        .nutrition-facts th, .nutrition-facts td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--gray);
+        }
+        .nutrition-facts th {
+            color: var(--primary);
+            font-weight: 600;
+            background: #f0f4fa;
+            font-size: .88rem;
+            text-transform: uppercase;
+        }
+        .nutrition-facts td { font-size: .98rem; }
+        .nutrition-facts .progress-cell { width: 30%; }
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s;
+        }
+        .modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal-content {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 32px 28px 24px 28px;
+            min-width: 320px;
+            max-width: 95vw;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 16px; right: 18px;
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: var(--gray-dark);
+            cursor: pointer;
+        }
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 18px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: .98rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--gray);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border var(--transition);
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        /* Login/Register */
+        #auth-container {
+            min-height: 100vh;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 38px 32px 28px 32px;
+            min-width: 320px;
+            max-width: 95vw;
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 22px;
+        }
+        .auth-header h1 {
+            color: var(--primary);
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .auth-header p {
+            color: var(--gray-dark);
+            font-size: 1rem;
+        }
+        .auth-footer {
+            text-align: center;
+            margin-top: 18px;
+        }
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .auth-footer a:hover { text-decoration: underline; }
+        .message {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: .98rem;
+        }
+        .message.error {
+            background: #ffe5e9;
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+        }
+        .message.success {
+            background: #e6f9f2;
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+        /* Chatbot */
+        #chatbot-btn {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 62px;
+            height: 62px;
+            box-shadow: 0 4px 16px rgba(74,111,165,0.18);
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s;
+        }
+        #chatbot-btn:hover { background: var(--secondary); color: #222; }
+        #chatbot-window {
+            position: fixed;
+            bottom: 110px;
+            right: 32px;
+            width: 340px;
+            max-width: 95vw;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(74,111,165,0.18);
+            display: none;
+            flex-direction: column;
+            z-index: 2001;
+            overflow: hidden;
+        }
+        #chatbot-header {
+            background: var(--primary-light);
+            color: #fff;
+            padding: 14px 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #chatbot-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.3rem;
+            cursor: pointer;
+        }
+        #chatbot-messages {
+            padding: 16px;
+            height: 260px;
+            overflow-y: auto;
+            background: #f4f6fb;
+            font-size: .98rem;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .chatbot-msg {
+            max-width: 80%;
+            padding: 9px 13px;
+            border-radius: 14px;
+            margin-bottom: 2px;
+            word-break: break-word;
+            box-shadow: 0 2px 8px rgba(74,111,165,0.06);
+        }
+        .chatbot-msg.user {
+            background: var(--primary-light);
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .chatbot-msg.bot {
+            background: #fff;
+            color: #222;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--gray);
+        }
+        #chatbot-input-area {
+            display: flex;
+            border-top: 1px solid var(--gray);
+            background: #fff;
+        }
+        #chatbot-input {
+            flex: 1;
+            border: none;
+            padding: 12px;
+            font-size: 1rem;
+            border-radius: 0;
+            outline: none;
+            background: #fff;
+        }
+        #chatbot-send {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            font-size: 1.2rem;
+            padding: 0 18px;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        #chatbot-send:hover { background: var(--secondary); color: #222; }
+        @media (max-width: 700px) {
+            .app-container { padding: 12px 2vw 80px 2vw; }
+            header { flex-direction: column; gap: 10px; padding: 12px 10px; }
+            .grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) {
+            .modal-content, .auth-card { padding: 18px 6vw 18px 6vw; }
+            .card { padding: 16px 8px 12px 8px; }
+            #chatbot-window { right: 2vw; width: 98vw; }
+            #chatbot-btn { right: 2vw; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login/Register -->
+    <div id="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1><i class="fas fa-leaf"></i> Nutri Steam</h1>
+                <p>Seu assistente nutricional inteligente</p>
+            </div>
+            <div id="auth-message" class="message" style="display:none"></div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" required placeholder="seu@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn" style="width:100%;">Entrar</button>
+                <div class="auth-footer">
+                    <p>Não tem uma conta? <a href="#" id="show-register">Cadastre-se</a></p>
+                </div>
+            </form>
+            <form id="register-form" style="display:none;">
+                <div class="form-group">
+                    <label for="reg-name">Nome Completo</label>
+                    <input type="text" id="reg-name" required placeholder="Seu nome">
+                </div>
+                <div class="form-group">
+                    <label for="reg-email">E-mail</label>
+                    <input type="email" id="reg-email" required placeholder="seu@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">Senha</label>
+                    <input type="password" id="reg-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn" style="width:100%;">Cadastrar</button>
+                <div class="auth-footer">
+                    <p>Já tem uma conta? <a href="#" id="show-login">Faça login</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- App -->
+    <div id="app-container" style="display:none;">
+        <header>
+            <div class="logo"><i class="fas fa-leaf"></i> Nutri Steam</div>
+            <div class="user-info">
+                <div class="user-avatar" id="user-avatar">U</div>
+                <button class="btn" id="logout-btn" style="padding:8px 18px;font-size:.98rem;">Sair</button>
+            </div>
+        </header>
+        <nav>
+            <button class="nav-btn active" data-tab="dashboard"><i class="fas fa-home"></i> Dashboard</button>
+            <button class="nav-btn" data-tab="nutrition"><i class="fas fa-apple-alt"></i> Nutrição</button>
+            <button class="nav-btn" data-tab="water"><i class="fas fa-tint"></i> Água</button>
+            <button class="nav-btn" data-tab="history"><i class="fas fa-history"></i> Histórico</button>
+            <button class="nav-btn" data-tab="reminders"><i class="fas fa-bell"></i> Lembretes</button>
+            <button class="nav-btn" data-tab="profile"><i class="fas fa-user"></i> Perfil</button>
+        </nav>
+        <main>
+            <!-- Dashboard -->
+            <section id="dashboard-tab" class="tab-content">
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fas fa-trophy"></i> Seu Progresso</span>
+                            <div class="card-actions">
+                                <button id="edit-weight-btn"><i class="fas fa-edit"></i></button>
+                            </div>
+                        </div>
+                        <div class="progress-container">
+                            <div id="weight-progress" class="progress-bar" style="width: 0%">0%</div>
+                        </div>
+                        <div class="stats">
+                            <div class="stat-item">
+                                <span id="current-weight" class="stat-value">0kg</span>
+                                <span class="stat-label">Peso atual</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="target-weight" class="stat-value">0kg</span>
+                                <span class="stat-label">Meta</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="weight-change" class="stat-value" style="color: var(--success);">0kg</span>
+                                <span class="stat-label">30 dias</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fas fa-fire"></i> Consumo Hoje</span>
+                            <div class="card-actions">
+                                <button id="refresh-stats-btn"><i class="fas fa-sync-alt"></i></button>
+                            </div>
+                        </div>
+                        <div class="progress-container">
+                            <div id="calories-progress" class="progress-bar" style="width: 0%">0/0 kcal</div>
+                        </div>
+                        <div class="stats">
+                            <div class="stat-item">
+                                <span id="protein-amount" class="stat-value">0g</span>
+                                <span class="stat-label">Proteínas</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="carbs-amount" class="stat-value">0g</span>
+                                <span class="stat-label">Carboidratos</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="fat-amount" class="stat-value">0g</span>
+                                <span class="stat-label">Gorduras</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-utensils"></i> Refeições Hoje</span>
+                        <button class="btn" id="add-meal-btn" style="padding: 7px 14px; font-size: .95rem;">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                    <div id="meal-log" class="meal-log">
+                        <div class="empty-state" style="text-align: center; padding: 18px; color: var(--gray-dark);">
+                            <i class="fas fa-utensils" style="font-size: 2rem; margin-bottom: 8px; opacity: 0.5;"></i>
+                            <p>Nenhuma refeição registrada hoje</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-lightbulb"></i> Dicas de Nutrição</span>
+                        <div class="card-actions">
+                            <button id="refresh-tips-btn"><i class="fas fa-sync-alt"></i></button>
+                        </div>
+                    </div>
+                    <ul id="nutrition-tips" class="tips-list"></ul>
+                </div>
+            </section>
+            <!-- Nutrição -->
+            <section id="nutrition-tab" class="tab-content" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-chart-pie"></i> Macronutrientes</span>
+                    </div>
+                    <div class="chart-container" style="height:240px;">
+                        <canvas id="macronutrients-chart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-seedling"></i> Recomendações Diárias</span>
+                    </div>
+                    <table class="nutrition-facts">
+                        <thead>
+                            <tr>
+                                <th>Nutriente</th>
+                                <th>Meta Diária</th>
+                                <th>Consumido</th>
+                                <th class="progress-cell">Progresso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Calorias</td>
+                                <td id="target-calories">2000 kcal</td>
+                                <td id="consumed-calories">0 kcal</td>
+                                <td class="progress-cell">
+                                    <div class="progress-container" style="height: 10px; margin: 0;">
+                                        <div id="calories-progress-small" class="progress-bar" style="width: 0%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Proteínas</td>
+                                <td id="target-protein">120g</td>
+                                <td id="consumed-protein">0g</td>
+                                <td class="progress-cell">
+                                    <div class="progress-container" style="height: 10px; margin: 0;">
+                                        <div id="protein-progress-small" class="progress-bar" style="width: 0%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Carboidratos</td>
+                                <td id="target-carbs">250g</td>
+                                <td id="consumed-carbs">0g</td>
+                                <td class="progress-cell">
+                                    <div class="progress-container" style="height: 10px; margin: 0;">
+                                        <div id="carbs-progress-small" class="progress-bar" style="width: 0%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Gorduras</td>
+                                <td id="target-fat">60g</td>
+                                <td id="consumed-fat">0g</td>
+                                <td class="progress-cell">
+                                    <div class="progress-container" style="height: 10px; margin: 0;">
+                                        <div id="fat-progress-small" class="progress-bar" style="width: 0%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <!-- Água -->
+            <section id="water-tab" class="tab-content" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-tint"></i> Controle de Água</span>
+                    </div>
+                    <div class="water-tracker" id="water-tracker"></div>
+                    <div class="water-amount" id="water-amount"></div>
+                </div>
+            </section>
+            <!-- Histórico -->
+            <section id="history-tab" class="tab-content" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-history"></i> Histórico de Pesos</span>
+                    </div>
+                    <table class="nutrition-facts">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Peso (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="weight-history-table"></tbody>
+                    </table>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-utensils"></i> Histórico de Refeições</span>
+                    </div>
+                    <table class="nutrition-facts">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Refeição</th>
+                                <th>Calorias</th>
+                            </tr>
+                        </thead>
+                        <tbody id="meal-history-table"></tbody>
+                    </table>
+                </div>
+            </section>
+            <!-- Lembretes -->
+            <section id="reminders-tab" class="tab-content" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-bell"></i> Lembretes do Dia</span>
+                    </div>
+                    <ul class="tips-list" id="reminder-list"></ul>
+                    <form id="reminder-form" style="margin-top:14px;">
+                        <input type="text" id="reminder-input" placeholder="Novo lembrete..." style="width:70%;padding:8px;border-radius:8px;border:1px solid var(--gray);font-size:.98rem;">
+                        <button class="btn" style="padding:8px 16px;">Adicionar</button>
+                    </form>
+                </div>
+            </section>
+            <!-- Perfil -->
+            <section id="profile-tab" class="tab-content" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-user"></i> Meu Perfil</span>
+                    </div>
+                    <div style="margin-bottom:18px;">
+                        <strong>Nome:</strong> <span id="profile-name"></span><br>
+                        <strong>E-mail:</strong> <span id="profile-email"></span>
+                    </div>
+                    <button class="btn" id="edit-profile-btn"><i class="fas fa-edit"></i> Editar Perfil</button>
+                </div>
+            </section>
+        </main>
+    </div>
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close">&times;</button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+    <!-- Chatbot Floating Button and Window -->
+    <button id="chatbot-btn" title="Chat com NutriBot"><i class="fas fa-comments"></i></button>
+    <div id="chatbot-window">
+        <div id="chatbot-header">
+            NutriBot
+            <button id="chatbot-close">&times;</button>
+        </div>
+        <div id="chatbot-messages"></div>
+        <form id="chatbot-input-area" autocomplete="off">
+            <input id="chatbot-input" type="text" placeholder="Digite sua dúvida..." required />
+            <button id="chatbot-send" type="submit"><i class="fas fa-paper-plane"></i></button>
+        </form>
+    </div>
+    <script>
+    // --- Simulação de dados do usuário ---
+    let user = {
+        name: "Usuário",
+        email: "usuario@email.com",
+        weight: 70,
+        targetWeight: 65,
+        weightHistory: [72, 71, 70, 70, 69.5, 70],
+        caloriesGoal: 2000,
+        proteinGoal: 120,
+        carbsGoal: 250,
+        fatGoal: 60,
+        waterGoal: 8,
+        waterDrank: 0,
+        meals: [],
+        today: new Date().toISOString().slice(0,10)
+    };
+    // --- Dicas de nutrição ---
+    const tipsArr = [
+        "Inclua vegetais coloridos em todas as refeições.",
+        "Beba pelo menos 2 litros de água por dia.",
+        "Evite alimentos ultraprocessados.",
+        "Prefira carboidratos integrais.",
+        "Inclua fontes de proteína magra.",
+        "Faça pequenas refeições ao longo do dia.",
+        "Evite pular o café da manhã.",
+        "Reduza o consumo de açúcar.",
+        "Durma bem para melhorar seus resultados.",
+        "Pratique atividade física regularmente."
+    ];
+    // --- Utilidades ---
+    function showTab(tab) {
+        document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+        document.getElementById(tab+'-tab').style.display = '';
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.nav-btn[data-tab="'+tab+'"]').classList.add('active');
+    }
+    function updateDashboard() {
+        // Peso
+        document.getElementById('current-weight').textContent = user.weight + "kg";
+        document.getElementById('target-weight').textContent = user.targetWeight + "kg";
+        let perc = Math.min(100, Math.round(100 * (user.weightHistory[0] - user.weight) / (user.weightHistory[0] - user.targetWeight || 1)));
+        document.getElementById('weight-progress').style.width = perc + "%";
+        document.getElementById('weight-progress').textContent = perc + "%";
+        let change = user.weightHistory[0] - user.weight;
+        document.getElementById('weight-change').textContent = (change >= 0 ? "-" : "+") + Math.abs(change).toFixed(1) + "kg";
+        // Consumo
+        let cals = user.meals.filter(m=>m.date===user.today).reduce((a,b)=>a+b.calories,0);
+        let prot = user.meals.filter(m=>m.date===user.today).reduce((a,b)=>a+b.protein,0);
+        let carb = user.meals.filter(m=>m.date===user.today).reduce((a,b)=>a+b.carbs,0);
+        let fat = user.meals.filter(m=>m.date===user.today).reduce((a,b)=>a+b.fat,0);
+        document.getElementById('calories-progress').style.width = Math.min(100, cals/user.caloriesGoal*100) + "%";
+        document.getElementById('calories-progress').textContent = cals + "/" + user.caloriesGoal + " kcal";
+        document.getElementById('protein-amount').textContent = prot + "g";
+        document.getElementById('carbs-amount').textContent = carb + "g";
+        document.getElementById('fat-amount').textContent = fat + "g";
+        // Meal log
+        let mealLog = document.getElementById('meal-log');
+        mealLog.innerHTML = "";
+        let mealsToday = user.meals.filter(m=>m.date===user.today);
+        if(mealsToday.length===0) {
+            mealLog.innerHTML = `<div class="empty-state" style="text-align: center; padding: 18px; color: var(--gray-dark);">
+                <i class="fas fa-utensils" style="font-size: 2rem; margin-bottom: 8px; opacity: 0.5;"></i>
+                <p>Nenhuma refeição registrada hoje</p>
+            </div>`;
+        } else {
+            mealsToday.forEach(m=>{
+                mealLog.innerHTML += `<div class="meal-item">
+                    <div class="meal-info">
+                        <span class="meal-name">${m.name}</span>
+                        <span class="meal-time">${m.time}</span>
+                    </div>
+                    <span class="meal-calories">${m.calories} kcal</span>
+                </div>`;
+            });
+        }
+        // Dicas
+        renderTips();
+    }
+    function updateNutritionTab() {
+        let cals = user.meals.filter(m=>m.date===user.today).reduce((a,b)=>a+b.calories,0);
+        let prot = user.meals.filter(m=>m.date===user.today).reduce((a,b)=>a+b.protein,0);
+        let carb = user.meals.filter(m=>m.date===user.today).reduce((a,b)=>a+b.carbs,0);
+        let fat = user.meals.filter(m=>m.date===user.today).reduce((a,b)=>a+b.fat,0);
+        // Tabela
+        document.getElementById('consumed-calories').textContent = cals + " kcal";
+        document.getElementById('consumed-protein').textContent = prot + "g";
+        document.getElementById('consumed-carbs').textContent = carb + "g";
+        document.getElementById('consumed-fat').textContent = fat + "g";
+        // Progressos
+        document.getElementById('calories-progress-small').style.width = Math.min(100, cals/user.caloriesGoal*100) + "%";
+        document.getElementById('protein-progress-small').style.width = Math.min(100, prot/user.proteinGoal*100) + "%";
+        document.getElementById('carbs-progress-small').style.width = Math.min(100, carb/user.carbsGoal*100) + "%";
+        document.getElementById('fat-progress-small').style.width = Math.min(100, fat/user.fatGoal*100) + "%";
+        // Chart
+        if(window.macrosChart) window.macrosChart.destroy();
+        let ctx = document.getElementById('macronutrients-chart').getContext('2d');
+        window.macrosChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Proteínas', 'Carboidratos', 'Gorduras'],
+                datasets: [{
+                    data: [prot, carb, fat],
+                    backgroundColor: [ '#43aa8b', '#4a6fa5', '#f7b801' ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                plugins: { legend: { position: 'bottom' } },
+                cutout: '65%',
+                responsive: true
+            }
+        });
+    }
+    function updateWaterTab() {
+        let tracker = document.getElementById('water-tracker');
+        tracker.innerHTML = "";
+        for(let i=1;i<=user.waterGoal;i++) {
+            tracker.innerHTML += `<div class="water-glass${i<=user.waterDrank?' filled':''}" data-idx="${i}"></div>`;
+        }
+        document.getElementById('water-amount').textContent = `Você bebeu ${user.waterDrank} de ${user.waterGoal} copos hoje.`;
+        document.querySelectorAll('.water-glass').forEach(g=>{
+            g.onclick = function() {
+                user.waterDrank = Number(g.dataset.idx);
+                updateWaterTab();
+            }
+        });
+    }
+    function updateProfileTab() {
+        document.getElementById('profile-name').textContent = user.name;
+        document.getElementById('profile-email').textContent = user.email;
+    }
+    function renderTips() {
+        let tips = [];
+        while(tips.length<3) {
+            let idx = Math.floor(Math.random()*tipsArr.length);
+            if(!tips.includes(tipsArr[idx])) tips.push(tipsArr[idx]);
+        }
+        let ul = document.getElementById('nutrition-tips');
+        ul.innerHTML = tips.map(t=>`<li>${t}</li>`).join('');
+    }
+    // Histórico de Pesos
+    function updateWeightHistory() {
+        const table = document.getElementById('weight-history-table');
+        if (!table) return;
+        table.innerHTML = '';
+        user.weightHistory.slice(0, 10).forEach((w, i) => {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            table.innerHTML += `<tr><td>${date.toLocaleDateString()}</td><td>${w} kg</td></tr>`;
+        });
+    }
+    // Histórico de Refeições
+    function updateMealHistory() {
+        const table = document.getElementById('meal-history-table');
+        if (!table) return;
+        table.innerHTML = '';
+        user.meals.slice(-10).reverse().forEach(m => {
+            table.innerHTML += `<tr><td>${m.date || user.today}</td><td>${m.name}</td><td>${m.calories} kcal</td></tr>`;
+        });
+    }
+    // Lembretes
+    let reminders = JSON.parse(localStorage.getItem('nutri_reminders') || '[]');
+    function renderReminders() {
+        const ul = document.getElementById('reminder-list');
+        if (!ul) return;
+        ul.innerHTML = reminders.map((r, i) =>
+            `<li>${r} <a href="#" style="color:var(--danger);margin-left:8px;" onclick="removeReminder(${i});return false;"><i class="fas fa-trash"></i></a></li>`
+        ).join('') || '<li style="color:var(--gray-dark);">Nenhum lembrete para hoje.</li>';
+    }
+    function removeReminder(idx) {
+        reminders.splice(idx, 1);
+        localStorage.setItem('nutri_reminders', JSON.stringify(reminders));
+        renderReminders();
+    }
+    window.removeReminder = removeReminder;
+    const reminderForm = document.getElementById('reminder-form');
+    if(reminderForm) {
+        reminderForm.onsubmit = function(e) {
+            e.preventDefault();
+            const val = document.getElementById('reminder-input').value.trim();
+            if(val) {
+                reminders.push(val);
+                localStorage.setItem('nutri_reminders', JSON.stringify(reminders));
+                document.getElementById('reminder-input').value = '';
+                renderReminders();
+            }
+        };
+    }
+    // --- Modal ---
+    function showModal(html) {
+        document.getElementById('modal-body').innerHTML = html;
+        document.getElementById('modal').classList.add('show');
+    }
+    function closeModal() {
+        document.getElementById('modal').classList.remove('show');
+    }
+    document.getElementById('modal-close').onclick = closeModal;
+    // --- Eventos principais ---
+    document.querySelectorAll('.nav-btn').forEach(btn=>{
+        btn.onclick = ()=>showTab(btn.dataset.tab);
+        btn.addEventListener('click', ()=>{
+            updateWeightHistory();
+            updateMealHistory();
+            renderReminders();
+        });
+    });
+    document.getElementById('logout-btn').onclick = ()=>{
+        document.getElementById('app-container').style.display = 'none';
+        document.getElementById('auth-container').style.display = '';
+    };
+    // --- Login/Register Simples ---
+    document.getElementById('show-register').onclick = e=>{
+        e.preventDefault();
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('register-form').style.display = '';
+        document.getElementById('auth-message').style.display = 'none';
+    };
+    document.getElementById('show-login').onclick = e=>{
+        e.preventDefault();
+        document.getElementById('register-form').style.display = 'none';
+        document.getElementById('login-form').style.display = '';
+        document.getElementById('auth-message').style.display = 'none';
+    };
+    document.getElementById('login-form').onsubmit = function(e){
+        e.preventDefault();
+        let email = document.getElementById('email').value;
+        let pass = document.getElementById('password').value;
+        if(email && pass) {
+            user.email = email;
+            document.getElementById('user-avatar').textContent = email[0].toUpperCase();
+            document.getElementById('profile-email').textContent = email;
+            document.getElementById('auth-message').style.display = 'none';
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('app-container').style.display = '';
+            updateAll();
+        } else {
+            let msg = document.getElementById('auth-message');
+            msg.textContent = "Preencha todos os campos.";
+            msg.className = "message error";
+            msg.style.display = '';
+        }
+    };
+    document.getElementById('register-form').onsubmit = function(e){
+        e.preventDefault();
+        let name = document.getElementById('reg-name').value;
+        let email = document.getElementById('reg-email').value;
+        let pass = document.getElementById('reg-password').value;
+        if(name && email && pass) {
+            user.name = name;
+            user.email = email;
+            document.getElementById('user-avatar').textContent = name[0].toUpperCase();
+            document.getElementById('profile-name').textContent = name;
+            document.getElementById('profile-email').textContent = email;
+            document.getElementById('auth-message').style.display = 'none';
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('app-container').style.display = '';
+            updateAll();
+        } else {
+            let msg = document.getElementById('auth-message');
+            msg.textContent = "Preencha todos os campos.";
+            msg.className = "message error";
+            msg.style.display = '';
+        }
+    };
+    // --- Adicionar refeição ---
+    document.getElementById('add-meal-btn').onclick = ()=>{
+        showModal(`
+            <div class="modal-title"><i class="fas fa-utensils"></i> Adicionar Refeição</div>
+            <form id="meal-form">
+                <div class="form-group">
+                    <label for="meal-name">Nome</label>
+                    <input type="text" id="meal-name" required placeholder="Ex: Almoço">
+                </div>
+                <div class="form-group">
+                    <label for="meal-time">Horário</label>
+                    <input type="time" id="meal-time" required>
+                </div>
+                <div class="form-group">
+                    <label for="meal-calories">Calorias</label>
+                    <input type="number" id="meal-calories" required min="0" placeholder="Ex: 450">
+                </div>
+                <div class="form-group">
+                    <label for="meal-protein">Proteínas (g)</label>
+                    <input type="number" id="meal-protein" required min="0" placeholder="Ex: 30">
+                </div>
+                <div class="form-group">
+                    <label for="meal-carbs">Carboidratos (g)</label>
+                    <input type="number" id="meal-carbs" required min="0" placeholder="Ex: 60">
+                </div>
+                <div class="form-group">
+                    <label for="meal-fat">Gorduras (g)</label>
+                    <input type="number" id="meal-fat" required min="0" placeholder="Ex: 10">
+                </div>
+                <button class="btn" style="width:100%;">Adicionar</button>
+            </form>
+        `);
+        document.getElementById('meal-form').onsubmit = function(e){
+            e.preventDefault();
+            user.meals.push({
+                name: document.getElementById('meal-name').value,
+                time: document.getElementById('meal-time').value,
+                calories: Number(document.getElementById('meal-calories').value),
+                protein: Number(document.getElementById('meal-protein').value),
+                carbs: Number(document.getElementById('meal-carbs').value),
+                fat: Number(document.getElementById('meal-fat').value),
+                date: user.today
+            });
+            closeModal();
+            updateAll();
+        };
+    };
+    // --- Editar peso ---
+    document.getElementById('edit-weight-btn').onclick = ()=>{
+        showModal(`
+            <div class="modal-title"><i class="fas fa-weight"></i> Atualizar Peso</div>
+            <form id="weight-form">
+                <div class="form-group">
+                    <label for="new-weight">Novo Peso (kg)</label>
+                    <input type="number" id="new-weight" required min="30" max="300" value="${user.weight}">
+                </div>
+                <button class="btn" style="width:100%;">Salvar</button>
+            </form>
+        `);
+        document.getElementById('weight-form').onsubmit = function(e){
+            e.preventDefault();
+            let w = Number(document.getElementById('new-weight').value);
+            if(w>0) {
+                user.weightHistory.unshift(w);
+                user.weight = w;
+                closeModal();
+                updateAll();
+            }
+        };
+    };
+    // --- Editar perfil ---
+    document.getElementById('edit-profile-btn').onclick = ()=>{
+        showModal(`
+            <div class="modal-title"><i class="fas fa-user"></i> Editar Perfil</div>
+            <form id="profile-form">
+                <div class="form-group">
+                    <label for="edit-name">Nome</label>
+                    <input type="text" id="edit-name" required value="${user.name}">
+                </div>
+                <div class="form-group">
+                    <label for="edit-email">E-mail</label>
+                    <input type="email" id="edit-email" required value="${user.email}">
+                </div>
+                <button class="btn" style="width:100%;">Salvar</button>
+            </form>
+        `);
+        document.getElementById('profile-form').onsubmit = function(e){
+            e.preventDefault();
+            user.name = document.getElementById('edit-name').value;
+            user.email = document.getElementById('edit-email').value;
+            document.getElementById('user-avatar').textContent = user.name[0].toUpperCase();
+            closeModal();
+            updateAll();
+        };
+    };
+    // --- Refresh dicas ---
+    document.getElementById('refresh-tips-btn').onclick = renderTips;
+    // --- Refresh stats ---
+    document.getElementById('refresh-stats-btn').onclick = updateDashboard;
+    // --- Atualizar tudo ---
+    function updateAll() {
+        updateDashboard();
+        updateNutritionTab();
+        updateWaterTab();
+        updateProfileTab();
+        updateWeightHistory();
+        updateMealHistory();
+        renderReminders();
+    }
+    // --- Inicialização ---
+    updateAll();
+
+    // --- Chatbot Simples ---
+    const chatbotBtn = document.getElementById('chatbot-btn');
+    const chatbotWindow = document.getElementById('chatbot-window');
+    const chatbotClose = document.getElementById('chatbot-close');
+    const chatbotMessages = document.getElementById('chatbot-messages');
+    const chatbotInput = document.getElementById('chatbot-input');
+    const chatbotForm = document.getElementById('chatbot-input-area');
+
+    chatbotBtn.onclick = () => {
+        chatbotWindow.style.display = chatbotWindow.style.display === 'flex' ? 'none' : 'flex';
+        if(chatbotWindow.style.display === 'flex') {
+            setTimeout(()=>chatbotInput.focus(), 200);
+        }
+    };
+    chatbotClose.onclick = () => chatbotWindow.style.display = 'none';
+
+    function chatbotAddMsg(msg, who='bot') {
+        const div = document.createElement('div');
+        div.className = 'chatbot-msg ' + who;
+        div.innerHTML = msg;
+        chatbotMessages.appendChild(div);
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
+    function chatbotBotReply(userMsg) {
+        // Respostas simples, pode expandir com IA ou API
+        const msg = userMsg.toLowerCase();
+        if(msg.includes('caloria') || msg.includes('calorias')) {
+            chatbotAddMsg('O controle de calorias é essencial para atingir seus objetivos. Você pode registrar refeições no Dashboard.');
+        } else if(msg.includes('proteína')) {
+            chatbotAddMsg('Proteínas são importantes para a construção muscular. Veja sua meta diária na aba Nutrição.');
+        } else if(msg.includes('água') || msg.includes('beber')) {
+            chatbotAddMsg('Lembre-se de beber água regularmente! Use o controle de água na aba Água.');
+        } else if(msg.includes('meta') || msg.includes('objetivo')) {
+            chatbotAddMsg('Você pode ajustar sua meta de peso e acompanhar seu progresso no Dashboard.');
+        } else if(msg.includes('oi') || msg.includes('olá')) {
+            chatbotAddMsg('Olá! Como posso ajudar na sua jornada nutricional?');
+        } else if(msg.includes('gordura')) {
+            chatbotAddMsg('O consumo de gorduras deve ser equilibrado. Veja detalhes na aba Nutrição.');
+        } else if(msg.includes('carbo')) {
+            chatbotAddMsg('Carboidratos são fonte de energia. Veja sua ingestão diária na aba Nutrição.');
+        } else if(msg.includes('refeiç')) {
+            chatbotAddMsg('Registre suas refeições no Dashboard para acompanhar seus nutrientes.');
+        } else if(msg.includes('dica') || msg.includes('sugestão')) {
+            const dicas = [
+                "Inclua vegetais coloridos em todas as refeições.",
+                "Beba pelo menos 2 litros de água por dia.",
+                "Evite alimentos ultraprocessados.",
+                "Prefira carboidratos integrais.",
+                "Inclua fontes de proteína magra.",
+                "Faça pequenas refeições ao longo do dia.",
+                "Evite pular o café da manhã.",
+                "Reduza o consumo de açúcar.",
+                "Durma bem para melhorar seus resultados.",
+                "Pratique atividade física regularmente."
+            ];
+            chatbotAddMsg(dicas[Math.floor(Math.random()*dicas.length)]);
+        } else if(msg.includes('histórico') || msg.includes('historico')) {
+            chatbotAddMsg('Você pode visualizar seu histórico de pesos e refeições na aba Histórico.');
+        } else if(msg.includes('lembrete')) {
+            chatbotAddMsg('Adicione lembretes personalizados na aba Lembretes para não esquecer de beber água, comer ou se exercitar!');
+        } else if(msg.includes('perfil')) {
+            chatbotAddMsg('Você pode editar seu nome e e-mail na aba Perfil.');
+        } else {
+            chatbotAddMsg('Desculpe, não entendi. Pergunte sobre calorias, proteínas, água, metas, histórico, lembretes ou peça uma dica!');
+        }
+    }
+    chatbotForm.onsubmit = function(e) {
+        e.preventDefault();
+        const val = chatbotInput.value.trim();
+        if(val) {
+            chatbotAddMsg(val, 'user');
+            setTimeout(()=>chatbotBotReply(val), 600);
+            chatbotInput.value = '';
+        }
+    };
+    </script>
+</body>
+</html><!-- ...existing code... -->
+        <nav>
+            <button class="nav-btn active" data-tab="dashboard"><i class="fas fa-home"></i> Dashboard</button>
+            <button class="nav-btn" data-tab="nutrition"><i class="fas fa-apple-alt"></i> Nutrição</button>
+            <button class="nav-btn" data-tab="water"><i class="fas fa-tint"></i> Água</button>
+            <button class="nav-btn" data-tab="history"><i class="fas fa-history"></i> Histórico</button>
+            <button class="nav-btn" data-tab="reminders"><i class="fas fa-bell"></i> Lembretes</button>
+            <button class="nav-btn" data-tab="recipes"><i class="fas fa-book-medical"></i> Receitas</button>
+            <button class="nav-btn" data-tab="profile"><i class="fas fa-user"></i> Perfil</button>
+        </nav>
+        <main>
+            <!-- ...outras sections... -->
+            <!-- RECEITAS -->
+            <section id="recipes-tab" class="tab-content" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-book-medical"></i> Receitas Especiais</span>
+                    </div>
+                    <div style="margin-bottom:18px;">
+                        <button class="btn" id="filter-all" style="margin-right:8px;">Todas</button>
+                        <button class="btn" id="filter-diabetes" style="margin-right:8px;">Diabéticos</button>
+                        <button class="btn" id="filter-hipertensao" style="margin-right:8px;">Hipertensos</button>
+                        <button class="btn" id="filter-obesos">Obesos</button>
+                    </div>
+                    <ul class="recipe-list" id="recipe-list"></ul>
+                </div>
+            </section>
+        </main>
+<!-- ...existing code... -->
+<script>
+// ...existing code...
+
+// Receitas para diabéticos, hipertensos e obesos (15+)
+const recipes = [
+    {
+        title: "Salada de Quinoa com Legumes",
+        type: "Diabéticos, Hipertensos, Obesos",
+        meta: "Rica em fibras • 20 min",
+        tags: ["diabetes", "hipertensao", "obesos"],
+        ingredients: [
+            "1 xícara de quinoa cozida",
+            "1/2 cenoura ralada",
+            "1/2 pepino picado",
+            "Tomate cereja",
+            "Salsinha",
+            "Azeite e limão"
+        ],
+        steps: "Misture todos os ingredientes e tempere com azeite e limão."
+    },
+    {
+        title: "Peito de Frango Grelhado com Brócolis",
+        type: "Diabéticos, Hipertensos, Obesos",
+        meta: "Proteico • 15 min",
+        tags: ["diabetes", "hipertensao", "obesos"],
+        ingredients: [
+            "1 filé de peito de frango",
+            "Brócolis cozido no vapor",
+            "Alho picado",
+            "Azeite",
+            "Sal sem sódio"
+        ],
+        steps: "Grelhe o frango com alho e azeite. Sirva com brócolis."
+    },
+    {
+        title: "Sopa de Abóbora com Gengibre",
+        type: "Diabéticos, Hipertensos",
+        meta: "Poucas calorias • 30 min",
+        tags: ["diabetes", "hipertensao"],
+        ingredients: [
+            "300g de abóbora",
+            "1 pedaço de gengibre",
+            "1 cebola pequena",
+            "Água",
+            "Salsinha"
+        ],
+        steps: "Cozinhe tudo, bata no liquidificador e finalize com salsinha."
+    },
+    {
+        title: "Omelete de Claras com Espinafre",
+        type: "Obesos, Hipertensos",
+        meta: "Baixo colesterol • 10 min",
+        tags: ["obesos", "hipertensao"],
+        ingredients: [
+            "3 claras de ovo",
+            "1 xícara de espinafre picado",
+            "Pimenta do reino",
+            "Azeite"
+        ],
+        steps: "Bata as claras, misture o espinafre e cozinhe em frigideira antiaderente."
+    },
+    {
+        title: "Iogurte Natural com Chia e Morango",
+        type: "Diabéticos, Obesos",
+        meta: "Café da manhã • 5 min",
+        tags: ["diabetes", "obesos"],
+        ingredients: [
+            "1 pote de iogurte natural desnatado",
+            "1 colher de sopa de chia",
+            "Morangos picados"
+        ],
+        steps: "Misture tudo e sirva gelado."
+    },
+    {
+        title: "Arroz Integral com Lentilha",
+        type: "Diabéticos, Hipertensos",
+        meta: "Rico em fibras • 30 min",
+        tags: ["diabetes", "hipertensao"],
+        ingredients: [
+            "1 xícara de arroz integral",
+            "1/2 xícara de lentilha",
+            "Cebola, alho, azeite"
+        ],
+        steps: "Cozinhe o arroz e a lentilha juntos, tempere com cebola, alho e azeite."
+    },
+    {
+        title: "Peixe Assado com Ervas",
+        type: "Hipertensos, Obesos",
+        meta: "Pouco sódio • 25 min",
+        tags: ["hipertensao", "obesos"],
+        ingredients: [
+            "1 filé de peixe branco",
+            "Ervas frescas (alecrim, tomilho)",
+            "Limão",
+            "Azeite"
+        ],
+        steps: "Tempere o peixe, regue com limão e asse por 20 minutos."
+    },
+    {
+        title: "Salada de Grão-de-Bico",
+        type: "Diabéticos, Hipertensos",
+        meta: "Vegano • 15 min",
+        tags: ["diabetes", "hipertensao"],
+        ingredients: [
+            "1 xícara de grão-de-bico cozido",
+            "Tomate picado",
+            "Cebola roxa",
+            "Azeite e limão"
+        ],
+        steps: "Misture tudo e sirva gelado."
+    },
+    {
+        title: "Panqueca de Aveia e Banana",
+        type: "Diabéticos, Obesos",
+        meta: "Sem açúcar • 10 min",
+        tags: ["diabetes", "obesos"],
+        ingredients: [
+            "1 banana madura",
+            "2 ovos",
+            "2 colheres de sopa de aveia"
+        ],
+        steps: "Amasse a banana, misture os ovos e a aveia, e frite pequenas porções."
+    },
+    {
+        title: "Wrap Integral de Frango e Alface",
+        type: "Obesos, Hipertensos",
+        meta: "Lanche saudável • 10 min",
+        tags: ["obesos", "hipertensao"],
+        ingredients: [
+            "1 pão folha integral",
+            "Frango desfiado",
+            "Alface",
+            "Tomate"
+        ],
+        steps: "Monte o wrap com os ingredientes e enrole."
+    },
+    {
+        title: "Suflê de Legumes Light",
+        type: "Diabéticos, Hipertensos, Obesos",
+        meta: "Poucas calorias • 25 min",
+        tags: ["diabetes", "hipertensao", "obesos"],
+        ingredients: [
+            "1 abobrinha ralada",
+            "1 cenoura ralada",
+            "2 ovos",
+            "1 colher de sopa de farinha de aveia"
+        ],
+        steps: "Misture tudo, coloque em forminhas e asse até dourar."
+    },
+    {
+        title: "Smoothie Verde Detox",
+        type: "Obesos, Diabéticos",
+        meta: "Detox • 5 min",
+        tags: ["obesos", "diabetes"],
+        ingredients: [
+            "1 folha de couve",
+            "1 maçã verde",
+            "1 limão",
+            "Água gelada"
+        ],
+        steps: "Bata tudo no liquidificador e sirva."
+    },
+    {
+        title: "Tabule de Quinoa",
+        type: "Diabéticos, Hipertensos",
+        meta: "Vegano • 15 min",
+        tags: ["diabetes", "hipertensao"],
+        ingredients: [
+            "1 xícara de quinoa cozida",
+            "Tomate picado",
+            "Pepino picado",
+            "Hortelã",
+            "Limão"
+        ],
+        steps: "Misture tudo e tempere com limão."
+    },
+    {
+        title: "Berinjela ao Forno com Tomate",
+        type: "Hipertensos, Obesos",
+        meta: "Pouco sódio • 20 min",
+        tags: ["hipertensao", "obesos"],
+        ingredients: [
+            "1 berinjela fatiada",
+            "Tomate em rodelas",
+            "Orégano",
+            "Azeite"
+        ],
+        steps: "Monte camadas e asse até dourar."
+    },
+    {
+        title: "Sopa de Legumes sem Batata",
+        type: "Diabéticos, Hipertensos, Obesos",
+        meta: "Pouco carboidrato • 25 min",
+        tags: ["diabetes", "hipertensao", "obesos"],
+        ingredients: [
+            "Abobrinha",
+            "Cenoura",
+            "Chuchu",
+            "Cebola",
+            "Alho"
+        ],
+        steps: "Cozinhe tudo, bata no liquidificador e sirva."
+    },
+    {
+        title: "Frango ao Curry com Legumes",
+        type: "Diabéticos, Obesos",
+        meta: "Proteico • 20 min",
+        tags: ["diabetes", "obesos"],
+        ingredients: [
+            "Peito de frango em cubos",
+            "Cenoura",
+            "Abobrinha",
+            "Curry em pó",
+            "Iogurte natural"
+        ],
+        steps: "Refogue o frango, adicione legumes e curry, finalize com iogurte."
+    },
+    {
+        title: "Mingau de Aveia com Maçã",
+        type: "Diabéticos, Obesos",
+        meta: "Café da manhã • 10 min",
+        tags: ["diabetes", "obesos"],
+        ingredients: [
+            "Aveia em flocos",
+            "Leite desnatado ou vegetal",
+            "Maçã picada",
+            "Canela"
+        ],
+        steps: "Cozinhe a aveia no leite, adicione maçã e canela."
+    }
+];
+
+// Renderização da aba receitas com filtro
+function renderRecipes(filter = "all") {
+    const list = document.getElementById('recipe-list');
+    let filtered = recipes;
+    if (filter === "diabetes") filtered = recipes.filter(r => r.tags.includes("diabetes"));
+    if (filter === "hipertensao") filtered = recipes.filter(r => r.tags.includes("hipertensao"));
+    if (filter === "obesos") filtered = recipes.filter(r => r.tags.includes("obesos"));
+    list.innerHTML = filtered.map(r => `
+        <li class="recipe-card">
+            <div class="recipe-title">${r.title}</div>
+            <div class="recipe-type"><b>Indicado para:</b> ${r.type}</div>
+            <div class="recipe-meta">${r.meta}</div>
+            <div class="recipe-ingredients"><strong>Ingredientes:</strong> ${r.ingredients.join(', ')}</div>
+            <div class="recipe-steps"><strong>Modo de preparo:</strong> ${r.steps}</div>
+        </li>
+    `).join('');
+}
+
+// Filtros de receitas
+document.addEventListener('DOMContentLoaded', function() {
+    if(document.getElementById('filter-all')) {
+        document.getElementById('filter-all').onclick = () => renderRecipes("all");
+        document.getElementById('filter-diabetes').onclick = () => renderRecipes("diabetes");
+        document.getElementById('filter-hipertensao').onclick = () => renderRecipes("hipertensao");
+        document.getElementById('filter-obesos').onclick = () => renderRecipes("obesos");
+    }
+});
+
+// Troca de abas (adiciona recipes)
+document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        document.getElementById(tab + '-tab').style.display = '';
+        if(tab === 'recipes') renderRecipes("all");
+    };
+});
+
+// ...restante do código...
+</script>
+<!-- ...existing code... -->
